@@ -24,56 +24,35 @@ app.get('/api/notes', (req, res) => {
 });
 // POST request to add a review
 app.post('/api/notes', (req, res) => {
-  // Log that a POST request was received
-  console.info(`${req.method} request received to add a review`);
-
+  
+const newNote = req.body
   // Destructuring assignment for the items in req.body
-  const { product, review, username } = req.body;
-
-  // If all the required properties are present
-  if (product && review && username) {
-    // Variable for the object we will save
-    const newReview = {
-      product,
-      review,
-      username,
-      review_id: uuid(),
-    };
-
+  
     // Obtain existing reviews
-    fs.readFile('./db/reviews.json', 'utf8', (err, data) => {
+    fs.readFile('./db.json', 'utf8', (err, data) => {
       if (err) {
         console.error(err);
       } else {
         // Convert string into JSON object
-        const parsedReviews = JSON.parse(data);
+        const parsedNotes = JSON.parse(data);
 
-    ;
          // Add a new review
-         parsedReviews.push(newReview);
+         parsedNotes.push(newNote);
 
          // Write updated reviews back to the file
          fs.writeFile(
-           './db/reviews.json',
-           JSON.stringify(parsedReviews, null, 4),
+           './db.json',
+           JSON.stringify(parsedNotes, null, 4),
            (writeErr) =>
              writeErr
-               ? console.error(writeErr)
-               : console.info('Successfully updated reviews!')
+               ? res.status(500).json(writeErr)
+               : res.status(201).json(parsedNotes)
          );
        }
      });
  
-     const response = {
-       status: 'success',
-       body: newReview,
-     };
- 
-     console.log(response);
-     res.status(201).json(response);
-   } else {
-     res.status(500).json('Error in posting review');
-   }
+     
+   
  });
  
 app.get('/', (req, res) =>
